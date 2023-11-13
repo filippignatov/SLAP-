@@ -1,0 +1,51 @@
+# Load the required library
+library(xml2)
+library(rvest)
+library(dplyr)
+
+# Define the base URL for the website
+base_url <- "https://example.com/edit_this_url?
+
+# Define the request URL for the website
+
+req_url <- base_url |>
+  
+  read_html(encoding = "UTF-8") |>
+  
+  html_nodes("enter html node that contain request url") 
+
+print(req_url)
+
+# Extract the text values from the nodeset
+requests <- xml_text(req_url)
+
+# Combine all values into a single column
+requests_df <- data.frame(Requests = requests)
+
+# Print the resulting data frame
+print(requests_df)
+
+# requests_df is dataframe with the "Requests" column to combine with base_url
+
+# Create an empty list to store data frames for each option
+all_data_frames <- list()
+
+# Loop through selected options
+for (requests in requests_df) {
+  # Combine the requests with the base URL to create the full URL
+  url <- paste(base_url, requests, sep = "")
+  
+  # Read HTML content from the URL
+  webpage <- read_html(url, encoding = "UTF-8")
+  
+  # Extract all tables from the HTML content
+  tables <- webpage %>% html_nodes("table")
+  
+  # Extract data frames from each table
+  data_frames <- lapply(tables, function(table) {
+    as.data.frame(html_table(table))
+  })
+  
+  # Store the data frames in the list, using the option as the key
+  all_data_frames[[requests]] <- data_frames
+}
